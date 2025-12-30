@@ -4,11 +4,20 @@ import { useEffect, useState } from "react";
 import api from "../api";
 
 function DesignList() {
-  const [data, setData] = useState([]);
+  const [data, setData] = useState(() => {
+    // Load from localStorage on initial render
+    const savedData = localStorage.getItem("designRequests");
+    return savedData ? JSON.parse(savedData) : [];
+  });
 
+  // Fetch from API once
   useEffect(() => {
     api.get("design-requests/")
-      .then(res => setData(res.data));
+      .then(res => {
+        setData(res.data);
+        localStorage.setItem("designRequests", JSON.stringify(res.data));
+      })
+      .catch(err => console.error("Error fetching design requests:", err));
   }, []);
 
   return (
@@ -34,17 +43,23 @@ function DesignList() {
             </tr>
           </thead>
           <tbody>
-            {data.map(d => (
-              <tr key={d.id}>
-                <td>{d.request_id}</td>
-                <td><span className="status">{d.status}</span></td>
-                <td>{d.request_date}</td>
-                <td>{d.requester_name}</td>
-                <td>{d.design_start_date}</td>
-                <td>{d.design_end_date}</td>
-                <td>{d.assigned_to}</td>
+            {data.length > 0 ? (
+              data.map(d => (
+                <tr key={d.id}>
+                  <td>{d.request_id}</td>
+                  <td><span className="status">{d.status}</span></td>
+                  <td>{d.request_date}</td>
+                  <td>{d.requester_name}</td>
+                  <td>{d.design_start_date}</td>
+                  <td>{d.design_end_date}</td>
+                  <td>{d.assigned_to}</td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="7" style={{ textAlign: "center" }}>No design requests found.</td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </div>
