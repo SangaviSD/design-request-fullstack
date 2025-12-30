@@ -4,29 +4,26 @@ import { useEffect, useState } from "react";
 import api from "../api";
 
 function DesignList() {
-  const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState(() => {
+    // Load from localStorage on initial render
+    const savedData = localStorage.getItem("designRequests");
+    return savedData ? JSON.parse(savedData) : [];
+  });
 
-  const fetchData = () => {
+  // Fetch from API once
+  useEffect(() => {
     api.get("design-requests/")
       .then(res => {
         setData(res.data);
-        setLoading(false);
+        localStorage.setItem("designRequests", JSON.stringify(res.data));
       })
-      .catch(err => {
-        console.error("Error fetching design requests:", err);
-        setLoading(false);
-      });
-  };
-
-  useEffect(() => {
-    fetchData();
+      .catch(err => console.error("Error fetching design requests:", err));
   }, []);
 
   return (
     <div className="page">
       <div className="page-header">
-        <h2>Design Requests</h2>
+        <h2>Design Request</h2>
         <Link to="/new">
           <button className="primary-btn">+ Add Design Request</button>
         </Link>
@@ -46,11 +43,7 @@ function DesignList() {
             </tr>
           </thead>
           <tbody>
-            {loading ? (
-              <tr>
-                <td colSpan="7" style={{ textAlign: "center" }}>Loading...</td>
-              </tr>
-            ) : data.length > 0 ? (
+            {data.length > 0 ? (
               data.map(d => (
                 <tr key={d.id}>
                   <td>{d.request_id}</td>
