@@ -67,6 +67,7 @@ API Endpoints
 
 GET:
 /api/design-requests/
+https://mcq-django-backend.onrender.com/api/design-requests/  for render...
 
 POST:
 /api/design-requests/
